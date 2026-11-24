@@ -8,26 +8,36 @@ and its inbox has quietly become compost. Writes the line to
 
 import os
 
+MAX_CHARS = 120
+OUTPUT_PATH = "/output/entry.txt"
+
 LINE = (
     "Out of office: I'm the fern you forgot in March. "
     "No water, no sunlight, no replies \u2014 my inbox is compost now."
 )
 
 
+def check_line(line: str) -> None:
+    """Gate the reply before it is written anywhere."""
+    assert "\n" not in line and "\r" not in line, "entry must be a single line"
+    assert line.strip(), "entry must not be only whitespace"
+    assert line == line.strip(), "entry must not start or end with whitespace"
+    assert line.endswith("."), "entry must end with a full stop"
+    assert 1 <= len(line) <= MAX_CHARS, (
+        f"entry must be 1-{MAX_CHARS} chars, got {len(line)}"
+    )
+
+
 def main() -> None:
-    assert "\n" not in LINE and "\r" not in LINE, "entry must be a single line"
-    assert LINE.strip(), "entry must not be only whitespace"
-    assert LINE == LINE.strip(), "entry must not start or end with whitespace"
-    assert LINE.endswith("."), "entry must end with a full stop"
-    assert 1 <= len(LINE) <= 120, f"entry must be 1-120 chars, got {len(LINE)}"
-    os.makedirs("/output", exist_ok=True)
-    with open("/output/entry.txt", "w", encoding="utf-8") as f:
+    check_line(LINE)
+    os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
+    with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
         f.write(LINE)
-    with open("/output/entry.txt", "r", encoding="utf-8") as f:
+    with open(OUTPUT_PATH, "r", encoding="utf-8") as f:
         written = f.read()
     assert written == LINE, "written entry does not match"
-    assert written.count("\n") == 0 and 1 <= len(written) <= 120
-    print(f"Wrote /output/entry.txt ({len(written)} characters)")
+    assert written.count("\n") == 0 and 1 <= len(written) <= MAX_CHARS
+    print(f"Wrote {OUTPUT_PATH} ({len(written)} characters)")
 
 
 if __name__ == "__main__":
